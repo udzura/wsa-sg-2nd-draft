@@ -273,7 +273,7 @@ end
 * [5] [suEXEC サポート](https://httpd.apache.org/docs/2.4/ja/suexec.html)
 * [6] [Ken Owens, Sarah Allen他, CNCF Serverless Whitepaper v1.0, 2018](https://github.com/cncf/wg-serverless/tree/master/whitepaper#cncf-serverless-whitepaper-v10) などの定義による
 * [7] [Circle CI](https://circleci.com/), [Drone.io](https://drone.io/) などがCIのビルド基盤にコンテナを利用する
-* [8] [R Rosen他, Resource management: Linux kernel Namespaces and cgroups, 2013]
+* [8] [R Rosen他, Resource management: Linux kernel Namespaces and cgroups, 2013](http://www.haifux.org/lectures/299/netLec7.pdf)
 * [9] [CAPABILITIES(7) - Linux Programmer's Manual](http://man7.org/linux/man-pages/man7/capabilities.7.html)
 * [10] [Docker security | Docker Documentation](https://docs.docker.com/engine/security/security/)
 * [11] [A seccomp overview - lwn.net](https://lwn.net/Articles/656307/)

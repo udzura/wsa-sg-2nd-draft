@@ -64,7 +64,7 @@ Linuxには、スーパーユーザ権限を分割し、その一部を付与あ
 
 コンテナにおいては、例えばDockerにおいてrootユーザーに与えられている権限が非常に限定されていることが知られている[10]。特にchrootなどの実行を禁止できるため、課題1.の対策となるし、例えばtcpdumpを実行する権限を剥奪したり、ファイルオウナーを変更する権限を剥奪することもできるので、課題2.、課題3.への対策にも応用することができる。
 
-逆に、コンテナの特定のバイナリに、システムに必要な一部のFile capability（こと `CAP_NET_BIND_SERVICE` ）を付与することで、コンテナのinitプロセスの所有者をrootでなくすことも可能である。ただしファイルシステムによりFile capabilityをサポートしない点は留意したい。
+逆に、コンテナの特定のバイナリに、システムに必要な一部のFile capability（こと通常ユーザで特権ポートを利用する `CAP_NET_BIND_SERVICE` ）を付与することで、コンテナのinitプロセスの所有者をrootでなくすことも可能である。ただしファイルシステムによりFile capabilityをサポートしない点は留意したい。
 
 ### c) Seccomp
 
@@ -98,13 +98,13 @@ profile test /usr/lib/test/test_binary {
 }
 ```
 
-<cite>図2: AppArmorのプロファイルの例。[Archilinux Wiki](https://wiki.archlinux.jp/index.php/AppArmor)より</cite>
+<cite>図2: AppArmorのプロファイルの例[13]</cite>
 
 この機構を用いると、コンテナ内部にrootであっても操作できない・閲覧できないファイルを作成することができる。したがって課題2.と3.に対して有効である。特定のバイナリ以外を実行不可能にすることも可能なので、課題4.に生かせるかもしれない。
 
 ### e) Service Meshにおけるセキュリティ担保
 
-コンテナ単一ではなく、コンテナ同士の通信においてもセキュリティを考える必要がある。Kubernetes等のオーケストレーション基盤を利用する場合、コンテナ同士の通信とそのルールの操作にあたる概念をサービスメッシュと呼んで層分けし、負荷分散やルーティング、トレーシング、障害時の切り離しなどのオペレーション要件をそのレイヤで実施することが提唱されている[13]。
+コンテナ単一ではなく、コンテナ同士の通信においてもセキュリティを考える必要がある。Kubernetes等のオーケストレーション基盤を利用する場合、コンテナ同士の通信とそのルールの操作にあたる概念をサービスメッシュと呼んで層分けし、負荷分散やルーティング、トレーシング、障害時の切り離しなどのオペレーション要件をそのレイヤで実施することが提唱されている[14]。
 
 サービスメッシュの機能として、大きくは以下の3点はセキュリティに関わるものであろう。
 
@@ -122,7 +122,7 @@ LXCにおける非特権コンテナ[3]は知られた例である。LXCは、Us
 
 ただし、一部の操作はどうしても特権が必要となる。具体的にはユーザID/グループIDのマッピングの作成に関する操作と、ネットワークに関する操作であり、それらの操作を単一で実行するプログラムをそれぞれ用意し、バイナリにset-use-id rootを行うことで安全な非特権ユーザでの操作を実現している[3]。
 
-また、Mobyプロジェクトなどのコミッタである須田氏により、特権がなくともruncやcontainerdを経由したコンテナ作成操作を可能にする実装が提案されている[14]。この実装には、Network Namespaceを分離する際にvethを使えずtapを利用せねばならないなどの課題があることが言及されている。
+また、Mobyプロジェクトなどのコミッタである須田氏により、特権がなくともruncやcontainerdを経由したコンテナ作成操作を可能にする実装が提案されている[15]。この実装には、Network Namespaceを分離する際にvethを使えずtapを利用せねばならないなどの課題があることが言及されている。
 
 なお、これら非特権のコンテナ作成自体は、コンテナそのものの権限コントロールではなく、コンテナを起動するプログラムの権限コントロールと考えられる。コンテナを起動するプログラムやデーモンに不要な特権が付いている場合、コンテナあるいはコンテナ以外のプログラムを意図しない形で走らされるなど、攻撃への危険度が増大する。従って非特権コンテナ等の利用は課題4.の対策の一環と考えられる。
 
@@ -236,7 +236,7 @@ suEXECセキュリティモデルの20項目について、[Apacheの当該ド�
 
 ### 進捗
 
-Haconiwaというコンテナランタイムにおいて、先述したようなホスティング環境でのセキュリティ強化の目的でPull Request[15]を出している。
+Haconiwaというコンテナランタイムにおいて、先述したようなホスティング環境でのセキュリティ強化の目的でPull Request[16]を出している。
 
 当該プルリクエストでの実装は「コンテナランタイムの設定ファイルと、コンテナランタイム自身のオウナーが一致するか」である。この検査をすることで、例えばnginxユーザが所有するHacofileではコンテナは作成できないので、nginxユーザの権限のみでは任意のコンテナを作成できる状況には陥らなくなる。実装の難易度に比べ堅牢性が大きく高まるので最初のサポートとした。
 
@@ -280,6 +280,7 @@ end
 * [10] [Docker security | Docker Documentation](https://docs.docker.com/engine/security/security/)
 * [11] [A seccomp overview - lwn.net](https://lwn.net/Articles/656307/)
 * [12] [AppArmor - Ubuntu wiki](https://wiki.ubuntu.com/AppArmor) AppArmorはCanonical社により開発されている
-* [13] [Managing microservices with the Istio service mesh - Kubernetes blog](https://kubernetes.io/blog/2017/05/managing-microservices-with-istio-service-mesh)
-* [14] [rootless containers (自分の取り組み) - Qiita](https://qiita.com/AkihiroSuda/items/145b86ec371d21ae42f2#rootless-containers-%E8%87%AA%E5%88%86%E3%81%AE%E5%8F%96%E3%82%8A%E7%B5%84%E3%81%BF)
-* [15] [Introduce secure-run option - Pull Request #135](https://github.com/haconiwa/haconiwa/pull/135)
+* [13] [Archilinux Wiki](https://wiki.archlinux.jp/index.php/AppArmor) のサンプルより
+* [14] [Managing microservices with the Istio service mesh - Kubernetes blog](https://kubernetes.io/blog/2017/05/managing-microservices-with-istio-service-mesh)
+* [15] [rootless containers (自分の取り組み) - Qiita](https://qiita.com/AkihiroSuda/items/145b86ec371d21ae42f2#rootless-containers-%E8%87%AA%E5%88%86%E3%81%AE%E5%8F%96%E3%82%8A%E7%B5%84%E3%81%BF)
+* [16] [Introduce secure-run option - Pull Request #135](https://github.com/haconiwa/haconiwa/pull/135)

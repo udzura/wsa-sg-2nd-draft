@@ -288,3 +288,18 @@ end
 * [14] [Managing microservices with the Istio service mesh - Kubernetes blog](https://kubernetes.io/blog/2017/05/managing-microservices-with-istio-service-mesh)
 * [15] [rootless containers (自分の取り組み) - Qiita](https://qiita.com/AkihiroSuda/items/145b86ec371d21ae42f2#rootless-containers-%E8%87%AA%E5%88%86%E3%81%AE%E5%8F%96%E3%82%8A%E7%B5%84%E3%81%BF)
 * [16] [Introduce secure-run option - Pull Request #135](https://github.com/haconiwa/haconiwa/pull/135)
+
+----
+
+## 当日の質疑、意見、議論など
+
+* ハイパーバイザーについて、Kata ContainerやOSvなんかも関連していそう
+  * Kata Containerは気になっていた。ただ、今回の手法はハイパーバイザーによる独立性の強化と両立しそう
+* 安全性の評価、どういうものがあるか、私気になります
+  * Center for Internety Security のホワイトペーパーなどを参考にすると良さそう
+  * https://www.cisecurity.org/benchmark/docker/
+  * https://www.cisecurity.org/benchmark/kubernetes/
+  * そのまま使えるわけじゃないけどどういうのをチェックしてるのかを確認するのには使えそう
+* Dockerの場合権限分離はUNIXユーザではなく、APIの認証とかそういう形だと思うので、ngx_mruby->haconiwaのような形のモデルと並べるのは誤解を生みそう
+  * その通りで、単純に比較できるモデルではないと考えられそう
+  * DockerのHTTPエンドポイントがイベント契機といいより、イベントを契機として汎用的なDocker APIが叩かれるイメージ。FastContainerをDockerでやる〜のような場合と比較するのが良いのではないか
